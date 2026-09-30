@@ -244,9 +244,13 @@ Small ideas, strange ideas,
 <div align="center">
 
 <img
-  src="https://github-readme-activity-graph.vercel.app/graph?username=vanshikasas&bg_color=fff7fa&color=c85a7c&line=d97994&point=c85a7c&area=true&area_color=f8dfe7&hide_border=true&custom_title=My%20GitHub%20Activity"
+  src="./assets/github-activity.svg"
   alt="GitHub activity graph"
 />
+
+<br>
+
+<sub>✿ a little visual diary of what I've been building</sub>
 
 </div>
 
@@ -275,8 +279,7 @@ Small ideas, strange ideas,
 <div align="center">
 
 <sub>
-Contribution data comes from GitHub activity.  
-Statistics cards may be cached by their respective services.
+Contribution data comes directly from GitHub. 
 </sub>
 
 </div>
