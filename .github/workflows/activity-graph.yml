@@ -1,0 +1,328 @@
+name: Generate GitHub Activity Graph
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate-activity:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate custom activity graph
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_TOKEN }}
+        run: |
+
+          python - <<'PY'
+
+          import os
+          import json
+          import urllib.request
+
+          USERNAME = "vanshikasas"
+
+          # -----------------------------
+          # GitHub GraphQL query
+          # -----------------------------
+
+          query = """
+          query($login: String!) {
+            user(login: $login) {
+              contributionsCollection {
+                contributionCalendar {
+                  totalContributions
+                  weeks {
+                    contributionDays {
+                      date
+                      contributionCount
+                    }
+                  }
+                }
+              }
+            }
+          }
+          """
+
+          payload = json.dumps({
+              "query": query,
+              "variables": {
+                  "login": USERNAME
+              }
+          }).encode("utf-8")
+
+          request = urllib.request.Request(
+              "https://api.github.com/graphql",
+              data=payload,
+              headers={
+                  "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                  "Content-Type": "application/json",
+                  "User-Agent": "github-profile"
+              }
+          )
+
+          with urllib.request.urlopen(request) as response:
+              result = json.loads(response.read())
+
+          calendar = result["data"]["user"]["contributionsCollection"]["contributionCalendar"]
+
+          days = []
+
+          for week in calendar["weeks"]:
+              for day in week["contributionDays"]:
+                  days.append(day)
+
+          # Last 365 days
+          days = days[-365:]
+
+          # -----------------------------
+          # Design
+          # -----------------------------
+
+          WIDTH = 1000
+          HEIGHT = 300
+
+          BACKGROUND = "#FFF7FA"
+          TEXT = "#795765"
+          MUTED = "#A88F99"
+          ROSE = "#C85A7C"
+          BLUSH = "#F4D6DF"
+
+          LEFT = 45
+          RIGHT = 35
+          TOP = 85
+          BOTTOM = 45
+
+          GRAPH_WIDTH = WIDTH - LEFT - RIGHT
+          GRAPH_HEIGHT = HEIGHT - TOP - BOTTOM
+
+          max_count = max(
+              [d["contributionCount"] for d in days] or [1]
+          )
+
+          # -----------------------------
+          # Start SVG
+          # -----------------------------
+
+          svg = []
+
+          svg.append(
+              f'<svg xmlns="http://www.w3.org/2000/svg" '
+              f'width="{WIDTH}" height="{HEIGHT}" '
+              f'viewBox="0 0 {WIDTH} {HEIGHT}">'
+          )
+
+          # Background
+
+          svg.append(
+              f'<rect width="100%" height="100%" '
+              f'rx="18" fill="{BACKGROUND}"/>'
+          )
+
+          # -----------------------------
+          # Header
+          # -----------------------------
+
+          svg.append(
+              f'<text x="35" y="38" '
+              f'font-family="Arial, sans-serif" '
+              f'font-size="21" '
+              f'font-weight="600" '
+              f'fill="{TEXT}">'
+              f'GitHub rhythm'
+              f'</text>'
+          )
+
+          svg.append(
+              f'<text x="35" y="59" '
+              f'font-family="Arial, sans-serif" '
+              f'font-size="11" '
+              f'fill="{MUTED}">'
+              f'a little look at what I have been building'
+              f'</text>'
+          )
+
+          # Total contributions
+
+          total = calendar["totalContributions"]
+
+          svg.append(
+              f'<text x="{WIDTH - 35}" y="38" '
+              f'text-anchor="end" '
+              f'font-family="Arial, sans-serif" '
+              f'font-size="20" '
+              f'font-weight="600" '
+              f'fill="{ROSE}">'
+              f'{total}'
+              f'</text>'
+          )
+
+          svg.append(
+              f'<text x="{WIDTH - 35}" y="58" '
+              f'text-anchor="end" '
+              f'font-family="Arial, sans-serif" '
+              f'font-size="10" '
+              f'fill="{MUTED}">'
+              f'contributions this year'
+              f'</text>'
+          )
+
+          # -----------------------------
+          # Graph
+          # -----------------------------
+
+          if days:
+
+              step = GRAPH_WIDTH / max(len(days) - 1, 1)
+
+              points = []
+
+              for index, day in enumerate(days):
+
+                  count = day["contributionCount"]
+
+                  x = LEFT + index * step
+
+                  y = (
+                      TOP
+                      + GRAPH_HEIGHT
+                      - (count / max_count) * GRAPH_HEIGHT
+                  )
+
+                  points.append((x, y, count))
+
+              # Baseline
+
+              svg.append(
+                  f'<line '
+                  f'x1="{LEFT}" '
+                  f'y1="{TOP + GRAPH_HEIGHT}" '
+                  f'x2="{WIDTH - RIGHT}" '
+                  f'y2="{TOP + GRAPH_HEIGHT}" '
+                  f'stroke="#F4D6DF" '
+                  f'stroke-width="1"/>'
+              )
+
+              # Area
+
+              area = (
+                  f'M {points[0][0]:.2f} '
+                  f'{TOP + GRAPH_HEIGHT} '
+              )
+
+              for x, y, count in points:
+                  area += f'L {x:.2f} {y:.2f} '
+
+              area += (
+                  f'L {points[-1][0]:.2f} '
+                  f'{TOP + GRAPH_HEIGHT} Z'
+              )
+
+              svg.append(
+                  f'<path d="{area}" '
+                  f'fill="{BLUSH}" '
+                  f'opacity="0.45"/>'
+              )
+
+              # Main line
+
+              path = ""
+
+              for index, (x, y, count) in enumerate(points):
+
+                  if index == 0:
+                      path += f'M {x:.2f} {y:.2f}'
+                  else:
+                      path += f' L {x:.2f} {y:.2f}'
+
+              svg.append(
+                  f'<path d="{path}" '
+                  f'fill="none" '
+                  f'stroke="{ROSE}" '
+                  f'stroke-width="2.5" '
+                  f'stroke-linecap="round" '
+                  f'stroke-linejoin="round"/>'
+              )
+
+              # Activity points
+
+              for x, y, count in points:
+
+                  if count == 0:
+                      continue
+
+                  if count >= max_count * 0.75:
+                      radius = 4
+                  elif count >= max_count * 0.50:
+                      radius = 3.5
+                  elif count >= max_count * 0.25:
+                      radius = 3
+                  else:
+                      radius = 2.5
+
+                  svg.append(
+                      f'<circle '
+                      f'cx="{x:.2f}" '
+                      f'cy="{y:.2f}" '
+                      f'r="{radius}" '
+                      f'fill="{ROSE}"/>'
+                  )
+
+          # -----------------------------
+          # Footer
+          # -----------------------------
+
+          svg.append(
+              f'<text x="35" y="{HEIGHT - 17}" '
+              f'font-family="Arial, sans-serif" '
+              f'font-size="10" '
+              f'fill="{MUTED}">'
+              f'quietly building • consistently learning'
+              f'</text>'
+          )
+
+          svg.append("</svg>")
+
+          # -----------------------------
+          # Save
+          # -----------------------------
+
+          os.makedirs("assets", exist_ok=True)
+
+          with open(
+              "assets/github-activity.svg",
+              "w",
+              encoding="utf-8"
+          ) as file:
+
+              file.write("\n".join(svg))
+
+          print("✓ Custom GitHub activity graph generated.")
+
+          PY
+
+      - name: Commit generated graph
+        run: |
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add assets/github-activity.svg
+
+          git diff --cached --quiet || \
+            git commit -m "chore: update GitHub activity graph"
+
+          git push
