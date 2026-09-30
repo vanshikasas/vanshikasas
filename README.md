@@ -13,7 +13,7 @@
 [![LinkedIn](https://img.shields.io/badge/LINKEDIN-BF3F68?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/vanshika-suthar-976aa9327)
 [![Behance](https://img.shields.io/badge/BEHANCE-C85A7C?style=for-the-badge&logo=behance&logoColor=white)](https://behance.net/vanshikasuthar)
 [![Pinterest](https://img.shields.io/badge/PINTEREST-D64F68?style=for-the-badge&logo=pinterest&logoColor=white)](https://pinterest.com/chattpatichori)
-[![Discord](https://img.shields.io/badge/DISCORD-B84C73?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/app)
+[![Discord](https://img.shields.io/badge/DISCORD-B84C73?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/RjctkyEqgF)
 [![Email](https://img.shields.io/badge/EMAIL-C94F70?style=for-the-badge&logo=gmail&logoColor=white)](mailto:jangidassociates08@gmail.com)
 
 <br>
