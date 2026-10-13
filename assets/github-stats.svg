@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="330" viewBox="0 0 720 330">
+<rect width="100%" height="100%" rx="18" fill="#FFF7FA"/>
+<text x="28" y="38" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#C85A7C">vanshikasas' GitHub garden</text>
+<text x="28" y="59" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">little steps, growing steadily</text>
+<rect x="28" y="85" width="322" height="58" rx="10" fill="#FFFFFF" stroke="#F4D6DF"/>
+<text x="43" y="107" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">Repositories</text>
+<text x="43" y="130" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#795765">8</text>
+<circle cx="322" cy="113" r="5" fill="#D97994"/>
+<rect x="378" y="85" width="322" height="58" rx="10" fill="#FFFFFF" stroke="#F4D6DF"/>
+<text x="393" y="107" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">Stars earned</text>
+<text x="393" y="130" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#795765">0</text>
+<circle cx="672" cy="113" r="5" fill="#D97994"/>
+<rect x="28" y="160" width="322" height="58" rx="10" fill="#FFFFFF" stroke="#F4D6DF"/>
+<text x="43" y="182" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">Commits this year</text>
+<text x="43" y="205" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#795765">54</text>
+<circle cx="322" cy="188" r="5" fill="#D97994"/>
+<rect x="378" y="160" width="322" height="58" rx="10" fill="#FFFFFF" stroke="#F4D6DF"/>
+<text x="393" y="182" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">Pull requests</text>
+<text x="393" y="205" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#795765">0</text>
+<circle cx="672" cy="188" r="5" fill="#D97994"/>
+<rect x="28" y="235" width="322" height="58" rx="10" fill="#FFFFFF" stroke="#F4D6DF"/>
+<text x="43" y="257" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">Issues opened</text>
+<text x="43" y="280" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#795765">0</text>
+<circle cx="322" cy="263" r="5" fill="#D97994"/>
+<rect x="378" y="235" width="322" height="58" rx="10" fill="#FFFFFF" stroke="#F4D6DF"/>
+<text x="393" y="257" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">Repositories contributed to</text>
+<text x="393" y="280" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#795765">6</text>
+<circle cx="672" cy="263" r="5" fill="#D97994"/>
+<line x1="28" y1="290" x2="692" y2="290" stroke="#F4D6DF"/>
+<text x="28" y="312" font-family="Arial,sans-serif" font-size="11" fill="#A88F99">181 contributions this year · updated automatically</text>
+</svg>
