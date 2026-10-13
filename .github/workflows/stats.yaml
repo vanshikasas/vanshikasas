@@ -1,0 +1,172 @@
+
+name: Generate Custom GitHub Stats
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate stats SVG
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          import json
+          import urllib.request
+          from datetime import datetime, timezone
+
+          username = "vanshikasas"
+
+          query = """
+          query($login: String!) {
+            user(login: $login) {
+              repositories(
+                first: 100
+                ownerAffiliations: OWNER
+                privacy: PUBLIC
+              ) {
+                totalCount
+                nodes {
+                  stargazerCount
+                }
+              }
+              contributionsCollection {
+                totalCommitContributions
+                totalPullRequestContributions
+                totalIssueContributions
+                totalRepositoryContributions
+                contributionCalendar {
+                  totalContributions
+                }
+              }
+              pullRequests {
+                totalCount
+              }
+              issues {
+                totalCount
+              }
+            }
+          }
+          """
+
+          payload = json.dumps({
+              "query": query,
+              "variables": {"login": username}
+          }).encode()
+
+          request = urllib.request.Request(
+              "https://api.github.com/graphql",
+              data=payload,
+              headers={
+                  "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                  "Content-Type": "application/json",
+                  "User-Agent": "github-profile-stats"
+              }
+          )
+
+          with urllib.request.urlopen(request) as response:
+              result = json.loads(response.read())
+
+          if result.get("errors"):
+              raise RuntimeError(json.dumps(result["errors"]))
+
+          user = result["data"]["user"]
+          repos = user["repositories"]["nodes"]
+          contributions = user["contributionsCollection"]
+
+          stars = sum(repo["stargazerCount"] for repo in repos)
+          commits = contributions["totalCommitContributions"]
+          prs = user["pullRequests"]["totalCount"]
+          issues = user["issues"]["totalCount"]
+          contributed = contributions["totalRepositoryContributions"]
+          total = contributions["contributionCalendar"]["totalContributions"]
+          repo_count = user["repositories"]["totalCount"]
+
+          bg = "#FFF7FA"
+          rose = "#C85A7C"
+          pink = "#D97994"
+          text = "#795765"
+          muted = "#A88F99"
+          border = "#F4D6DF"
+
+          stats = [
+              ("Repositories", repo_count),
+              ("Stars earned", stars),
+              ("Commits this year", commits),
+              ("Pull requests", prs),
+              ("Issues opened", issues),
+              ("Repositories contributed to", contributed),
+          ]
+
+          width, height = 720, 330
+          svg = [
+              f'<svg xmlns="http://www.w3.org/2000/svg" '
+              f'width="{width}" height="{height}" '
+              f'viewBox="0 0 {width} {height}">',
+              f'<rect width="100%" height="100%" rx="18" fill="{bg}"/>',
+              f'<text x="28" y="38" font-family="Arial,sans-serif" '
+              f'font-size="21" font-weight="700" fill="{rose}">'
+              f"vanshikasas' GitHub garden</text>",
+              f'<text x="28" y="59" font-family="Arial,sans-serif" '
+              f'font-size="11" fill="{muted}">'
+              f"little steps, growing steadily</text>",
+          ]
+
+          for i, (label, value) in enumerate(stats):
+              col = i % 2
+              row = i // 2
+              x = 28 + col * 350
+              y = 105 + row * 75
+
+              svg.extend([
+                  f'<rect x="{x}" y="{y-20}" width="322" height="58" '
+                  f'rx="10" fill="#FFFFFF" stroke="{border}"/>',
+                  f'<text x="{x+15}" y="{y+2}" '
+                  f'font-family="Arial,sans-serif" font-size="11" '
+                  f'fill="{muted}">{label}</text>',
+                  f'<text x="{x+15}" y="{y+25}" '
+                  f'font-family="Arial,sans-serif" font-size="20" '
+                  f'font-weight="700" fill="{text}">{value}</text>',
+                  f'<circle cx="{x+294}" cy="{y+8}" r="5" fill="{pink}"/>',
+              ])
+
+          svg.extend([
+              f'<line x1="28" y1="290" x2="692" y2="290" '
+              f'stroke="{border}"/>',
+              f'<text x="28" y="312" font-family="Arial,sans-serif" '
+              f'font-size="11" fill="{muted}">'
+              f'{total} contributions this year · updated automatically'
+              f'</text>',
+              '</svg>'
+          ])
+
+          os.makedirs("assets", exist_ok=True)
+
+          with open("assets/github-stats.svg", "w", encoding="utf-8") as f:
+              f.write("\n".join(svg))
+
+          print("Custom stats SVG generated successfully.")
+          PY
+
+      - name: Commit generated stats
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/github-stats.svg
+          git diff --cached --quiet || git commit -m "chore: update custom GitHub stats"
+          git push
