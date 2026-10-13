@@ -261,9 +261,9 @@ Small ideas, strange ideas,
 <div align="center">
 
 <img
-    height="180"
-    src="https://github-readme-stats-three-liard-27.vercel.app/api?username=vanshikasas&show_icons=true&hide_border=true&bg_color=fff7fa&title_color=c85a7c&icon_color=d97994&text_color=795765&include_all_commits=true"
-    alt="GitHub statistics"
+  height="180"
+  src="./assets/github-stats.svg"
+  alt="Custom GitHub statistics"
 />
 
 <img
